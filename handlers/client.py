@@ -18,9 +18,13 @@ async def schedule(message: types.Message):
 async def address(message: types.Message):
     await bot.send_message(message.chat.id, msg.oops)
 
+async def my_id(message: types.Message):
+    await bot.send_message(message.chat.id, message.from_user.id)
+
 def register_handlers_client(dp: Dispatcher):
     dp.register_message_handler(welcome, commands=['start'])
     dp.register_message_handler(help, commands=['help'])
     dp.register_message_handler(menu, commands=['menu'])
     dp.register_message_handler(schedule, commands=['schedule'])
     dp.register_message_handler(address, commands=['address'])
+    dp.register_message_handler(my_id, commands=['id'])

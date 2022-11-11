@@ -1,2 +1,5 @@
 # Config file
 TOKEN = '5653086049:AAHvEgUtIhEjgEa120t5hOAAtBf6T3Ce07A'
+ADMIN_ID = []
+ADMIN_PASSWORD = 'admin'
+ADMIN_LOGIN = 'admin'
