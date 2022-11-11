@@ -5,6 +5,7 @@ from create_bot import dp, bot
 
 import messages as msg
 from config import ADMIN_ID, ADMIN_PASSWORD, ADMIN_LOGIN
+from data_base import sqlite_db
 
 class Admin(StatesGroup):
     photo = State()
@@ -39,6 +40,13 @@ async def start(message: types.Message):
         await bot.send_message(message.chat.id, 'Upload a photo of the dish')
     else: await bot.send_message(message.chat.id, 'You do not have access to this command 🔒')
 
+async def cancel_state(message: types.Message, state: FSMContext):
+    cur_state = await state.get_state()
+    if cur_state is None:
+        return
+    await state.finish()
+    await bot.send_message(message.chat.id, 'Canceled')
+
 async def load_photo(message: types.Message, state: FSMContext):
     async with state.proxy() as data:
         data['photo'] = message.photo[0].file_id
@@ -60,9 +68,9 @@ async def load_description(message: types.Message, state: FSMContext):
 async def load_price(message: types.Message, state: FSMContext):
     async with state.proxy() as data:
         data['price'] = float(message.text)
-    async with state.proxy() as data:
-        await bot.send_message(message.chat.id, f'Название: {str(data)}')
+    await sqlite_db.sql_add_command(state, 'menu')
     # Clear all data!
+    await bot.send_message(message.chat.id, 'Done!')
     await state.finish()
 
 # Change login and password
@@ -87,14 +95,9 @@ async def load_new_password(message: types.Message, state: FSMContext):
     await state.finish()
     await bot.send_message(message.chat.id, 'Done!')
 
-async def cancel_state(message: types.Message, state: FSMContext):
-    cur_state = await state.get_state()
-    if cur_state is None:
-        return
-    await state.finish()
-    await bot.send_message(message.chat.id, 'Canceled')
 def register_handlers_admin(dp: Dispatcher):
     dp.register_message_handler(admin_help, commands='adminhelp')
+    dp.register_message_handler(cancel_state, state='*', commands=['cancel'])
     dp.register_message_handler(start, commands=['upload'], state=None)
     dp.register_message_handler(load_photo, content_types=['photo'], state=Admin.photo)
     dp.register_message_handler(load_name, state=Admin.name)
@@ -104,5 +107,3 @@ def register_handlers_admin(dp: Dispatcher):
     dp.register_message_handler(change_password_and_login, commands='change', state=None)
     dp.register_message_handler(load_new_login, state=Change.login)
     dp.register_message_handler(load_new_password, state=Change.password)
-
-    dp.register_message_handler(cancel_state, state='*', commands=['cancel'])

@@ -2,6 +2,7 @@ from aiogram import types, Dispatcher
 from create_bot import bot, dp
 
 import messages as msg
+from data_base import sqlite_db
 
 async def welcome(message: types.Message):
     await bot.send_message(message.chat.id, f'Hello {message.from_user.full_name}! 🤖\nYou can ask me about the schedule or menu, a list of all the commands : /help')
@@ -10,13 +11,13 @@ async def help(message: types.Message):
     await bot.send_message(message.chat.id, '/schedule — Schedule of work\n/menu — Delicious burger menu\n/address — Addresses of our burger joints')
 
 async def menu(message: types.Message):
-    await bot.send_message(message.chat.id, msg.oops)
+    await sqlite_db.sql_read(message, 'menu')
 
 async def schedule(message: types.Message):
     await bot.send_message(message.chat.id, 'Schedule 🕓\nMo-Fr: 09:00-20:00am\nSa-Su: 10:00-19:00am')
 
 async def address(message: types.Message):
-    await bot.send_message(message.chat.id, msg.oops)
+    await bot.send_message(message.chat.id, '12th December Street, building 117\nTo see the work schedule, enter the work /schedule')
 
 async def my_id(message: types.Message):
     await bot.send_message(message.chat.id, message.from_user.id)
