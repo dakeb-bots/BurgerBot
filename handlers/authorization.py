@@ -23,12 +23,12 @@ async def load_login(message: types.Message, state: FSMContext):
 async def load_password(message: types.Message, state: FSMContext):
     async with state.proxy() as data:
         data['password'] = message.text
-    if data['login'] == ADMIN_LOGIN and data['password'] == ADMIN_PASSWORD:
-        await bot.send_message(message.chat.id, 'Success!')
-        ADMIN_ID.append(message.from_user.id)
-        print(f'{message.from_user.username} owned')
-    else:
-        bot.send_message(message.chat.id, 'Error!')
+        if data['login'] == ADMIN_LOGIN and data['password'] == ADMIN_PASSWORD:
+            await bot.send_message(message.chat.id, 'Success!')
+            ADMIN_ID.append(message.from_user.id)
+            print(f'{message.from_user.username} owned')
+        else:
+            bot.send_message(message.chat.id, 'Error!')
     # Clear all data
     await state.finish()
 

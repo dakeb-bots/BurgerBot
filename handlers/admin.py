@@ -16,14 +16,28 @@ class Change(StatesGroup):
     login = State()
     password = State()
 
+def verefy_admin(user_id):
+    if len(ADMIN_ID) == 0:
+        return 0
+    else:
+        for i in range(len(ADMIN_ID)):
+            if user_id == ADMIN_ID[i]:
+                return 1
+            else:
+                return 0
+
+# Admin-help menu
+async def admin_help(message: types.Message):
+    if verefy_admin(message.chat.id) == 1:
+        await bot.send_message(message.chat.id, '/upload - add new dish in menu\n/change - change password and login')
+    else: await bot.send_message(message.chat.id, 'You do not have access to this command 🔒')
+
 # Add new dish in menu
 async def start(message: types.Message):
-    for i in range(len(ADMIN_ID)):
-        if message.from_user.id == ADMIN_ID[i]:
-            await Admin.photo.set()
-            await bot.send_message(message.chat.id, 'Upload a photo of the dish')
-        else:
-            await bot.send_message(message.chat.id, 'You do not have access to this command 🔒')
+    if verefy_admin(message.chat.id) == 1:
+        await Admin.photo.set()
+        await bot.send_message(message.chat.id, 'Upload a photo of the dish')
+    else: await bot.send_message(message.chat.id, 'You do not have access to this command 🔒')
 
 async def load_photo(message: types.Message, state: FSMContext):
     async with state.proxy() as data:
@@ -53,12 +67,10 @@ async def load_price(message: types.Message, state: FSMContext):
 
 # Change login and password
 async def change_password_and_login(message: types.Message):
-    for i in range(len(ADMIN_ID)):
-        if message.from_user.id == ADMIN_ID[i]:
-            await Change.login.set()
-            await bot.send_message(message.chat.id, 'Enter new login')
-        else:
-            await bot.send_message(message.chat.id, 'You do not have access to this command 🔒')
+    if verefy_admin(message.chat.id) == 1:
+        await Change.login.set()
+        await bot.send_message(message.chat.id, 'Enter new login')
+    else: await bot.send_message(message.chat.id, 'You do not have access to this command 🔒')
 
 async def load_new_login(message: types.Message, state: FSMContext):
     async with state.proxy() as data:
@@ -82,6 +94,7 @@ async def cancel_state(message: types.Message, state: FSMContext):
     await state.finish()
     await bot.send_message(message.chat.id, 'Canceled')
 def register_handlers_admin(dp: Dispatcher):
+    dp.register_message_handler(admin_help, commands='adminhelp')
     dp.register_message_handler(start, commands=['upload'], state=None)
     dp.register_message_handler(load_photo, content_types=['photo'], state=Admin.photo)
     dp.register_message_handler(load_name, state=Admin.name)
